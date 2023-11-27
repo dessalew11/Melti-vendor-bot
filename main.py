@@ -141,10 +141,11 @@ async def web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     # Here we use `json.loads`, since the WebApp sends the data JSON serialized string
     # (see webappbot.html)
     data = json.loads(update.effective_message.web_app_data.data)
+    print(data)
 
     chat_id = update.message.chat_id
     title_head = "Your Order Lists"
-    description = "from AAA CAFE"
+    description = "ETHIO-24-Market"
     payload = "Custom-Payload"
     currency = "USD"
 
@@ -197,21 +198,22 @@ async def web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
         formatted_row = "{:<15} {:<10} {:<10}\n".format(product_name, price, quantity)
         message += formatted_row
+    # Extract owner IDs from the data list
+    owner_ids = [item['owner'] for item in data]
+    # Iterate over the owner IDs and send messages
 
-    payload = {
-        'chat_id': "761513957",
-        'text': f"New Order:\n\nName: {title_head}\nDescription: {description}\nCurrency: {currency}\nPrices:\n{message}\nNeed Name: True\nNeed Phone Number: True",
-        'reply_markup': markup
-    }
+    for owner_id in owner_ids:
+        payload = {
+            'chat_id': owner_id,
+            'text': f"New Order:\n\nName: {title_head}\nDescription: {description}\nCurrency: {currency}\nPrices:\n{message}\nNeed Name: True\nNeed Phone Number: True",
+            'reply_markup': markup
+        }
 
-    response = requests.post(url, json=payload)
-
-    if response.status_code == 200:
-        print("Invoice message sent successfully to the other Telegram bot.")
-    else:
-        print("Failed to send the invoice message.")
-
-
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            print("Invoice message sent successfully to the other Telegram bot.")
+        else:
+            print("Failed to send the invoice message.")
 
 def main() -> None:
     """Run the bot."""
